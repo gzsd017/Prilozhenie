@@ -5,7 +5,7 @@ from tkinter import ttk
 
 #Кнопка "Калькулятор"
 def click_button_calc():
-    subprocess.Popen(["python", "calc.py"])
+    subprocess.Popen(["python", "calc1.py"])
     exit(root)
 
 #Кнопка "Правила использования"
@@ -22,8 +22,8 @@ root.title("Решение уравнений 1,2,3,4 степени")
 root.geometry("1920x1080")
 root.config(bg='#33ffe6')
 
-label = ttk.Label(root, text="Решение уравнений 1,2,3,4 степени", background='#33ffe6', font=("Arial", 40))
-label.pack()
+label = ttk.Label(text="Решение уравнений 1,2,3,4 степени", background="#FFCDD2", foreground="#B71C1C", padding=8)
+label.pack(expand=True)
 
 btn = ttk.Button(text="Калькулятор", command=click_button_calc)
 btn.place(relx=0.5, rely=0.3, anchor="c", relwidth=0.45, relheight=0.10)
