@@ -5,7 +5,7 @@ from tkinter import ttk
 
 #Кнопка "Калькулятор"
 def click_button_calc():
-    subprocess.Popen(["python", "calc1.py"])
+    subprocess.Popen(["python", "calc.py"])
     exit(root)
 
 #Кнопка "Правила использования"
