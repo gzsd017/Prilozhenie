@@ -6,12 +6,22 @@ import subprocess
 from sympy.solvers import solve
 from sympy import Symbol
 
+def center_window(window, width, height):
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    x = (screen_width - width) // 2
+    y = (screen_height - height) // 2
+
+    window.geometry(f"{width}x{height}+{x}+{y}")
 
 def reshenie(root, answer):
     root5 = Toplevel(root)
+    center_window(root5, 500, 300)
     root5.title("Решение")
+    root5.resizable(False, False)
 
-    editor = ScrolledText(root5, width=50,  height=10)
+    editor = ScrolledText(root5, width=60,  height=15)
     editor.insert(1.0, answer)
     editor.pack()
 
@@ -35,7 +45,7 @@ def solver2(a, b, c):
         x2 = (-b - sqrt(D)) / (2 * a)
         text = 'D = %s \n x1 = %s \n x2 = %s \n' % (D, x1, x2)
     else:
-        text = 'D = %s \n Это уранвение не имеет корней' % D
+        text = 'D = %s \n Это уравнение не имеет корней' % D
     return text
 
 
@@ -118,8 +128,9 @@ def handler(degree):
 
 
 root4 = Tk()
+center_window(root4, 700, 500)
 root4.title('Калькулятор')
-root4.geometry('700x500+200+200')
+root4.geometry('700x500')
 root4.config(bg='#7FFF00')
 root4.resizable(width=False, height=False)
 
