@@ -80,7 +80,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Menu"))
         self.pushButton.setText(_translate("MainWindow", "Калькулятор"))
         self.pushButton_2.setText(_translate("MainWindow", "Правила"))
-        self.pushButton_3.setText(_translate("MainWindow", "Назад"))
+        self.pushButton_3.setText(_translate("MainWindow", "Выход"))
         self.label.setText(_translate("MainWindow", " Калькулятор уравнений 1,2,3,4 степени"))
 
 class Ui_Calculator(object):
@@ -210,6 +210,8 @@ class Ui_Calculator(object):
         self.pushButton_23.setText(_translate("Calculator", "."))
         self.pushButton_24.setText(_translate("Calculator", ","))
 
+
+
 class Ui_MainWindow2(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -250,6 +252,40 @@ class Ui_MainWindow2(object):
         self.pushButton.setText(_translate("MainWindow", "Назад"))
         self.pushButton_2.setText(_translate("MainWindow", "Выход"))
 
+class Ui_ResultWindow(object):
+    def setupUi(self, ResultWindow):
+        ResultWindow.setObjectName("ResultWindow")
+        ResultWindow.resize(450, 580)
+        self.centralwidget = QtWidgets.QWidget(ResultWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.centralwidget.setStyleSheet("font: 10pt \"Segoe Script\";")
+        self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
+        self.textEdit.setGeometry(QtCore.QRect(10, 10, 430, 500))
+        self.textEdit.setReadOnly(True)
+        self.textEdit.setObjectName("textEdit")
+        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton.setGeometry(QtCore.QRect(180, 520, 93, 28))
+        self.pushButton.setStyleSheet("background-color: rgb(99, 193, 255);")
+        self.pushButton.setObjectName("pushButton")
+        ResultWindow.setCentralWidget(self.centralwidget)
+
+        self.retranslateUi(ResultWindow)
+        QtCore.QMetaObject.connectSlotsByName(ResultWindow)
+
+    def retranslateUi(self, ResultWindow):
+        _translate = QtCore.QCoreApplication.translate
+        ResultWindow.setWindowTitle(_translate("ResultWindow", "Решение"))
+        self.pushButton.setText(_translate("ResultWindow", "Назад"))
+
+class ResultWindow(QtWidgets.QMainWindow):
+    def __init__(self, result_text):
+        super().__init__()
+        self.ui = Ui_ResultWindow()
+        self.ui.setupUi(self)
+        self.ui.textEdit.setPlainText(result_text)
+        self.ui.pushButton.clicked.connect(self.close)
+
+
 class MainApp(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -262,15 +298,30 @@ class MainApp(QtWidgets.QMainWindow):
         self.main_window.pushButton_2.clicked.connect(self.show_rules)
         self.main_window.pushButton_3.clicked.connect(self.close)
 
+        self.result_window = None  # Окно для отображения результата
+
     def show_calculator(self):
         self.calculator_window = QtWidgets.QMainWindow()
         self.calculator.setupUi(self.calculator_window)
+        self.calculator.btnResh.clicked.connect(self.calculate)
         self.calculator_window.show()
 
     def show_rules(self):
         self.rules_window_window = QtWidgets.QMainWindow()
         self.rules_window.setupUi(self.rules_window_window)
         self.rules_window_window.show()
+
+    def calculate(self):
+        equation = self.calculator.lineEdit.text()
+        # Здесь должна быть логика для решения уравнения
+        # Для демонстрации я просто передам введенное уравнение как результат
+        result = "Решение: " + equation
+
+        self.result_window = ResultWindow(result)
+        self.result_window.show()
+
+    def close(self):
+        QtWidgets.QApplication.quit()
 
 if __name__ == "__main__":
     import sys
