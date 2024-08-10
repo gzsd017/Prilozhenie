@@ -1,3 +1,4 @@
+from sympy import symbols, Eq, solve, sympify
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
@@ -83,6 +84,7 @@ class Ui_MainWindow(object):
         self.pushButton_3.setText(_translate("MainWindow", "Выход"))
         self.label.setText(_translate("MainWindow", " Калькулятор уравнений 1,2,3,4 степени"))
 
+
 class Ui_Calculator(object):
     def setupUi(self, Calculator):
         Calculator.setObjectName("Calculator")
@@ -93,7 +95,7 @@ class Ui_Calculator(object):
         self.centralwidget.setObjectName("centralwidget")
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit.setGeometry(QtCore.QRect(12, 40, 428, 80))
-        self.lineEdit.setStyleSheet("color: rgb(255, 255, 255);")
+        self.lineEdit.setStyleSheet("color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);")
         self.lineEdit.setObjectName("lineEdit")
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setGeometry(QtCore.QRect(10, 10, 93, 28))
@@ -177,6 +179,8 @@ class Ui_Calculator(object):
         self.pushButton_24.setObjectName("pushButton_24")
         Calculator.setCentralWidget(self.centralwidget)
 
+        self.add_functions()
+
         self.retranslateUi(Calculator)
         QtCore.QMetaObject.connectSlotsByName(Calculator)
 
@@ -210,6 +214,26 @@ class Ui_Calculator(object):
         self.pushButton_23.setText(_translate("Calculator", "."))
         self.pushButton_24.setText(_translate("Calculator", ","))
 
+    def add_functions(self):
+        buttons = [
+            self.pushButton_2, self.pushButton_3, self.pushButton_4, self.pushButton_5,
+            self.pushButton_6, self.pushButton_7, self.pushButton_8, self.pushButton_9,
+            self.pushButton_10, self.pushButton_11, self.pushButton_12, self.pushButton_13,
+            self.pushButton_14, self.pushButton_15, self.pushButton_16, self.pushButton_17,
+            self.pushButton_18, self.pushButton_19, self.pushButton_20, self.pushButton_21,
+            self.pushButton_23, self.pushButton_24
+        ]
+
+        for btn in buttons:
+            btn.clicked.connect(lambda ch, btn=btn: self.write_number(btn.text()))
+
+        self.btnNazad.clicked.connect(self.lineEdit.clear)
+        self.btnDel.clicked.connect(self.lineEdit.backspace)
+
+    def write_number(self, number):
+        current_line = self.lineEdit.text()
+        new_line = current_line + str(number)
+        self.lineEdit.setText(new_line)
 
 
 class Ui_MainWindow2(object):
@@ -319,13 +343,33 @@ class MainApp(QtWidgets.QMainWindow):
         self.show()  # Показываем главное окно
 
     def calculate(self):
-        equation = self.calculator.lineEdit.text()
-        result = "Решение: " + equation
+        equation = self.calculator.lineEdit.text().strip()
+        x = symbols('x')  # Объявляем переменную x
+
+        try:
+            if '=' not in equation:
+                result = "Ошибка: Уравнение должно содержать знак '='."
+                raise ValueError(result)
+
+            left, right = equation.split('=')
+
+            # Используем sympify для преобразования строк в математические выражения
+            left_expr = sympify(left.replace('^', '**'))
+            right_expr = sympify(right)
+
+            # Создаем уравнение
+            eq = Eq(left_expr, right_expr)
+
+            # Находим корни
+            roots = solve(eq, x)
+            result = f"Корни: {roots}"
+
+        except Exception as e:
+            result = f"Ошибка: {str(e)}"
+
         self.result_window = ResultWindow(result)
         self.result_window.show()
 
-    def close(self):
-        QtWidgets.QApplication.quit()
 
 if __name__ == "__main__":
     import sys
@@ -334,4 +378,5 @@ if __name__ == "__main__":
     main_app = MainApp()
     main_app.show()
     sys.exit(app.exec_())
+
 
