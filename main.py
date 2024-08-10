@@ -237,10 +237,6 @@ class Ui_MainWindow2(object):
         self.pushButton.setGeometry(QtCore.QRect(10, 550, 93, 28))
         self.pushButton.setStyleSheet("background-color: rgb(99, 193, 255);")
         self.pushButton.setObjectName("pushButton")
-        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_2.setGeometry(QtCore.QRect(350, 0, 93, 28))
-        self.pushButton_2.setStyleSheet("background-color: rgb(255, 140, 101);")
-        self.pushButton_2.setObjectName("pushButton_2")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -250,7 +246,6 @@ class Ui_MainWindow2(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Правила использования"))
         self.pushButton.setText(_translate("MainWindow", "Назад"))
-        self.pushButton_2.setText(_translate("MainWindow", "Выход"))
 
 class Ui_ResultWindow(object):
     def setupUi(self, ResultWindow):
@@ -298,25 +293,34 @@ class MainApp(QtWidgets.QMainWindow):
         self.main_window.pushButton_2.clicked.connect(self.show_rules)
         self.main_window.pushButton_3.clicked.connect(self.close)
 
-        self.result_window = None  # Окно для отображения результата
+        self.calculator_window = None
+        self.rules_window_window = None
+        self.result_window = None
 
     def show_calculator(self):
         self.calculator_window = QtWidgets.QMainWindow()
         self.calculator.setupUi(self.calculator_window)
         self.calculator.btnResh.clicked.connect(self.calculate)
+        self.calculator.pushButton.clicked.connect(self.return_to_main)  # Кнопка "Назад"
         self.calculator_window.show()
 
     def show_rules(self):
         self.rules_window_window = QtWidgets.QMainWindow()
         self.rules_window.setupUi(self.rules_window_window)
+        self.rules_window.pushButton.clicked.connect(self.return_to_main)  # Кнопка "Назад"
         self.rules_window_window.show()
+
+    def return_to_main(self):
+        if self.calculator_window:
+            self.calculator_window.close()
+        if self.rules_window_window:
+            self.rules_window_window.close()
+
+        self.show()  # Показываем главное окно
 
     def calculate(self):
         equation = self.calculator.lineEdit.text()
-        # Здесь должна быть логика для решения уравнения
-        # Для демонстрации я просто передам введенное уравнение как результат
         result = "Решение: " + equation
-
         self.result_window = ResultWindow(result)
         self.result_window.show()
 
@@ -330,3 +334,4 @@ if __name__ == "__main__":
     main_app = MainApp()
     main_app.show()
     sys.exit(app.exec_())
+
