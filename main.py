@@ -246,7 +246,7 @@ class Ui_MainWindow2(object):
         self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
         self.textEdit.setGeometry(QtCore.QRect(10, 40, 430, 500))
         self.textEdit.setObjectName("textEdit")
-        self.textEdit.setReadOnly(True)  # Текст будет только для чтения.
+        self.textEdit.setReadOnly(True)
         self.textEdit.setPlainText(
             "Правила использования:\n"
             "1. Введите уравнение для решения в текстовое поле.\n"
@@ -268,7 +268,7 @@ class Ui_MainWindow2(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Правила использования"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Rules"))
         self.pushButton.setText(_translate("MainWindow", "Назад"))
 
 class Ui_ResultWindow(object):
@@ -293,7 +293,7 @@ class Ui_ResultWindow(object):
 
     def retranslateUi(self, ResultWindow):
         _translate = QtCore.QCoreApplication.translate
-        ResultWindow.setWindowTitle(_translate("ResultWindow", "Решение"))
+        ResultWindow.setWindowTitle(_translate("ResultWindow", "Reshenie"))
         self.pushButton.setText(_translate("ResultWindow", "Назад"))
 
 class ResultWindow(QtWidgets.QMainWindow):
@@ -322,17 +322,23 @@ class MainApp(QtWidgets.QMainWindow):
         self.result_window = None
 
     def show_calculator(self):
+        if self.calculator_window:
+            self.calculator_window.close()
         self.calculator_window = QtWidgets.QMainWindow()
         self.calculator.setupUi(self.calculator_window)
         self.calculator.btnResh.clicked.connect(self.calculate)
-        self.calculator.pushButton.clicked.connect(self.return_to_main)  # Кнопка "Назад"
+        self.calculator.pushButton.clicked.connect(self.return_to_main)
         self.calculator_window.show()
+        self.close()
 
     def show_rules(self):
+        if self.rules_window_window:
+            self.rules_window_window.close()
         self.rules_window_window = QtWidgets.QMainWindow()
         self.rules_window.setupUi(self.rules_window_window)
-        self.rules_window.pushButton.clicked.connect(self.return_to_main)  # Кнопка "Назад"
+        self.rules_window.pushButton.clicked.connect(self.return_to_main)
         self.rules_window_window.show()
+        self.close()
 
     def return_to_main(self):
         if self.calculator_window:
@@ -340,29 +346,47 @@ class MainApp(QtWidgets.QMainWindow):
         if self.rules_window_window:
             self.rules_window_window.close()
 
-        self.show()  # Показываем главное окно
+        self.show()
 
     def calculate(self):
         equation = self.calculator.lineEdit.text().strip()
-        x = symbols('x')  # Объявляем переменную x
+        x = symbols('x')
 
         try:
             if '=' not in equation:
-                result = "Ошибка: Уравнение должно содержать знак '='."
-                raise ValueError(result)
+                raise ValueError("Уравнение должно содержать знак '='.")
 
             left, right = equation.split('=')
 
-            # Используем sympify для преобразования строк в математические выражения
             left_expr = sympify(left.replace('^', '**'))
             right_expr = sympify(right)
 
-            # Создаем уравнение
             eq = Eq(left_expr, right_expr)
 
-            # Находим корни
-            roots = solve(eq, x)
-            result = f"Корни: {roots}"
+            # Detailed solution steps
+            steps = "Решение уравнения:\n"
+            steps += f"1. Исходное уравнение: {eq}\n"
+
+            # Step-by-step transformation
+            steps += "2. Приводим уравнение к стандартному виду:\n"
+            eq_standard = Eq(left_expr - right_expr, 0)
+            steps += f"   {eq_standard}\n"
+
+            # Simplifying the equation
+            steps += "3. Упрощаем уравнение:\n"
+            simplified_eq = eq_standard.simplify()
+            steps += f"   {simplified_eq}\n"
+
+            # Solving the equation
+            steps += "4. Решаем уравнение:\n"
+            roots = solve(simplified_eq, x)
+            if roots:
+                for i, root in enumerate(roots, start=1):
+                    steps += f"   Корень {i}: x = {root}\n"
+            else:
+                steps += "   Нет решений.\n"
+
+            result = steps
 
         except Exception as e:
             result = f"Ошибка: {str(e)}"
@@ -378,5 +402,7 @@ if __name__ == "__main__":
     main_app = MainApp()
     main_app.show()
     sys.exit(app.exec_())
+
+
 
 
