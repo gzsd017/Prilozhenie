@@ -361,25 +361,19 @@ class MainApp(QtWidgets.QMainWindow):
             left_expr = sympify(left.replace('^', '**'))
             right_expr = sympify(right)
 
-            eq = Eq(left_expr, right_expr)
-
-            # Detailed solution steps
             steps = "Решение уравнения:\n"
-            steps += f"1. Исходное уравнение: {eq}\n"
+            steps += f"1. Исходное уравнение: {equation}\n"
 
-            # Step-by-step transformation
-            steps += "2. Приводим уравнение к стандартному виду:\n"
-            eq_standard = Eq(left_expr - right_expr, 0)
-            steps += f"   {eq_standard}\n"
+            steps += "2. Переносим все члены в одну часть уравнения:\n"
+            combined_expr = left_expr - right_expr
+            steps += f"   {combined_expr} = 0\n"
 
-            # Simplifying the equation
             steps += "3. Упрощаем уравнение:\n"
-            simplified_eq = eq_standard.simplify()
-            steps += f"   {simplified_eq}\n"
+            simplified_expr = combined_expr.simplify()
+            steps += f"   {simplified_expr} = 0\n"
 
-            # Solving the equation
-            steps += "4. Решаем уравнение:\n"
-            roots = solve(simplified_eq, x)
+            steps += "4. Решаем уравнение, находя значения x, которые обращают уравнение в ноль:\n"
+            roots = solve(simplified_expr, x)
             if roots:
                 for i, root in enumerate(roots, start=1):
                     steps += f"   Корень {i}: x = {root}\n"
