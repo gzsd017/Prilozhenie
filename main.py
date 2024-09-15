@@ -1,5 +1,7 @@
-from sympy import symbols, Eq, solve, sympify
+from sympy import symbols, solve, sympify
 from PyQt5 import QtCore, QtGui, QtWidgets
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -198,7 +200,7 @@ class Ui_Calculator(object):
         self.pushButton_6.setText(_translate("Calculator", "+"))
         self.pushButton_7.setText(_translate("Calculator", "-"))
         self.pushButton_8.setText(_translate("Calculator", "*"))
-        self.pushButton_9.setText(_translate("Calculator", ":"))
+        self.pushButton_9.setText(_translate("Calculator", "/"))
         self.pushButton_10.setText(_translate("Calculator", "7"))
         self.pushButton_11.setText(_translate("Calculator", "8"))
         self.pushButton_12.setText(_translate("Calculator", "9"))
@@ -209,7 +211,7 @@ class Ui_Calculator(object):
         self.pushButton_17.setText(_translate("Calculator", "1"))
         self.pushButton_18.setText(_translate("Calculator", "2"))
         self.pushButton_19.setText(_translate("Calculator", "3"))
-        self.pushButton_20.setText(_translate("Calculator", "/"))
+        self.pushButton_20.setText(_translate("Calculator", ":"))
         self.pushButton_21.setText(_translate("Calculator", "0"))
         self.pushButton_23.setText(_translate("Calculator", "."))
         self.pushButton_24.setText(_translate("Calculator", ","))
@@ -232,6 +234,12 @@ class Ui_Calculator(object):
 
     def write_number(self, number):
         current_line = self.lineEdit.text()
+
+        if number == '0' and '=' in current_line:
+            index_of_equal = current_line.index('=')
+            if current_line[index_of_equal + 1:].count('0') > 0:
+                return
+
         new_line = current_line + str(number)
         self.lineEdit.setText(new_line)
 
@@ -361,6 +369,9 @@ class MainApp(QtWidgets.QMainWindow):
             left_expr = sympify(left.replace('^', '**'))
             right_expr = sympify(right)
 
+            if '/0' in str(right_expr):
+                raise ZeroDivisionError("Деление на ноль недопустимо.")
+
             steps = "Решение уравнения:\n"
             steps += f"1. Исходное уравнение: {equation}\n"
 
@@ -372,21 +383,67 @@ class MainApp(QtWidgets.QMainWindow):
             simplified_expr = combined_expr.simplify()
             steps += f"   {simplified_expr} = 0\n"
 
-            steps += "4. Решаем уравнение, находя значения x, которые обращают уравнение в ноль:\n"
-            roots = solve(simplified_expr, x)
-            if roots:
-                for i, root in enumerate(roots, start=1):
-                    steps += f"   Корень {i}: x = {root}\n"
-            else:
-                steps += "   Нет решений.\n"
+            degree = simplified_expr.as_poly(x).degree()
+
+            if degree == 1:
+                root = solve(simplified_expr, x)
+                steps += f"   Корень: x = {root[0]}\n"
+
+            elif degree == 2:
+                a, b, c = simplified_expr.as_poly(x).all_coeffs()
+                D = b ** 2 - 4 * a * c
+
+                if D > 0:
+                    root1 = (-b + D ** 0.5) / (2 * a)
+                    root2 = (-b - D ** 0.5) / (2 * a)
+                    steps += f"   Дискриминант D = {D}\n"
+                    steps += f"   Два корня: x1 = {root1}, x2 = {root2}\n"
+                    roots = [root1, root2]
+                elif D == 0:
+                    root = -b / (2 * a)
+                    steps += f"   Дискриминант D = {D}\n"
+                    steps += f"   Один корень (двойной): x = {root}\n"
+                    roots = [root]
+                else:
+                    steps += f"   Уравнение не имеет вещественных корней (D < 0).\n"
+                    roots = []
+
+            elif degree >= 3:
+                roots = solve(simplified_expr, x)
+                if roots:
+                    for i, root in enumerate(roots, start=1):
+                        steps += f"   Корень {i}: x = {root}\n"
+                else:
+                    steps += "   Нет решений.\n"
+
+                self.plot_function(simplified_expr, roots)
 
             result = steps
 
+        except ZeroDivisionError as e:
+            result = f"Ошибка: {str(e)}"
         except Exception as e:
             result = f"Ошибка: {str(e)}"
 
         self.result_window = ResultWindow(result)
         self.result_window.show()
+
+    def plot_function(self, expr, roots):
+        x_vals = np.linspace(-10, 10, 400)
+        y_vals = [expr.subs('x', val) for val in x_vals]
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(x_vals, y_vals, label='f(x)', color='blue')
+
+        plt.axhline(0, color='black', lw=1)
+        plt.axvline(0, color='black', lw=1)
+        plt.title('График уравнения')
+        plt.xlabel('x')
+        plt.ylabel('f(x)')
+        plt.ylim(-10, 10)
+        plt.grid()
+        plt.legend()
+        plt.show()
 
 
 if __name__ == "__main__":
