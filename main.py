@@ -1,4 +1,4 @@
-from sympy import symbols, solve, sympify
+from sympy import symbols, solve, sympify, SympifyError
 from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib.pyplot as plt
 import numpy as np
@@ -257,12 +257,12 @@ class Ui_MainWindow2(object):
         self.textEdit.setReadOnly(True)
         self.textEdit.setPlainText(
             "Правила использования:\n"
-            "1. Введите уравнение для решения в текстовое поле.\n"
+            "1. Введите уравнение для решения в текстовое поле. Пример: 8*x-8=0.\n"
             "2. Используйте кнопки на калькуляторе для ввода коэффициентов и операций.\n"
             "3. Нажмите кнопку 'Решить', чтобы получить решение.\n"
             "4. Кнопка 'C' очищает текущее уравнение.\n"
             "5. Кнопка '<---' удаляет последний введенный символ.\n"
-            "6. Используйте '+' для сложения, '-' для вычитания, '*' для умножения и ':' для деления.\n"
+            "6. Используйте '+' для сложения, '-' для вычитания, '*' для умножения и '/' для деления.\n"
             "7. Кнопка '^' используется для возведения в степень.\n"
         )
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
@@ -386,8 +386,8 @@ class MainApp(QtWidgets.QMainWindow):
             degree = simplified_expr.as_poly(x).degree()
 
             if degree == 1:
-                root = solve(simplified_expr, x)
-                steps += f"   Корень: x = {root[0]}\n"
+                roots = [-simplified_expr.as_poly(x).coeffs()[1] / simplified_expr.as_poly(x).coeffs()[0]]
+                steps += f"   Корень: x = {roots[0]}\n"
 
             elif degree == 2:
                 a, b, c = simplified_expr.as_poly(x).all_coeffs()
@@ -421,6 +421,8 @@ class MainApp(QtWidgets.QMainWindow):
             result = steps
 
         except ZeroDivisionError as e:
+            result = f"Ошибка: {str(e)}"
+        except ValueError as e:
             result = f"Ошибка: {str(e)}"
         except Exception as e:
             result = f"Ошибка: {str(e)}"
